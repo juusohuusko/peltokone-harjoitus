@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Huoltosopimuslaskuri – Peltokone Oy</title>
+<style>
+  :root {
+    --bg: #f4f6f4;
+    --card: #ffffff;
+    --ink: #1c2420;
+    --muted: #5d6b63;
+    --line: #d8e0da;
+    --brand: #2f6b43;
+    --brand-soft: #eaf2ec;
+    --accent: #c8891f;
+    --radius: 10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121714;
+      --card: #1a211d;
+      --ink: #eef2ef;
+      --muted: #9daca3;
+      --line: #2c3833;
+      --brand: #6fb886;
+      --brand-soft: #1f2a24;
+      --accent: #e0a94a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121714;
+    --card: #1a211d;
+    --ink: #eef2ef;
+    --muted: #9daca3;
+    --line: #2c3833;
+    --brand: #6fb886;
+    --brand-soft: #1f2a24;
+    --accent: #e0a94a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+    padding: 24px 16px 48px;
+  }
+  .wrap { max-width: 860px; margin: 0 auto; }
+  header { margin-bottom: 20px; }
+  .kicker {
+    font-size: 13px; letter-spacing: .08em; text-transform: uppercase;
+    color: var(--brand); font-weight: 700; margin: 0 0 4px;
+  }
+  h1 { font-size: 26px; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0; font-size: 15px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px;
+  }
+  h2 { font-size: 15px; text-transform: uppercase; letter-spacing: .06em;
+       color: var(--muted); margin: 0 0 16px; }
+  label { display: block; font-weight: 600; font-size: 14px; margin: 0 0 6px; }
+  .field { margin-bottom: 18px; }
+  select, input[type="number"] {
+    width: 100%; padding: 10px 12px; font-size: 15px; font-family: inherit;
+    color: var(--ink); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 8px;
+  }
+  select:focus, input:focus { outline: 2px solid var(--brand); outline-offset: 1px; }
+  .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+  .total {
+    background: var(--brand-soft); border: 1px solid var(--line);
+    border-radius: 8px; padding: 16px; margin-bottom: 16px;
+  }
+  .total .lbl { font-size: 13px; color: var(--muted); font-weight: 600; }
+  .total .big { font-size: 34px; font-weight: 700; color: var(--brand); line-height: 1.15; }
+  .total .sub { font-size: 14px; color: var(--muted); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  td { padding: 7px 0; border-bottom: 1px solid var(--line); }
+  td:last-child { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  tr.sum td { font-weight: 700; border-top: 2px solid var(--line); }
+  .disclaimer {
+    margin-top: 22px; font-size: 13px; color: var(--muted);
+    border-left: 3px solid var(--accent); padding-left: 12px;
+  }
+  button.print {
+    margin-top: 14px; width: 100%; padding: 10px; font: inherit; font-weight: 600;
+    color: #fff; background: var(--brand); border: 0; border-radius: 8px; cursor: pointer;
+  }
+  button.print:hover { filter: brightness(1.08); }
+  @media print { button.print { display: none; } body { background: #fff; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="kicker">Peltokone Oy · myynnin työkalu</p>
+    <h1>Huoltosopimuslaskuri</h1>
+    <p class="lead">Valitse konemalli, huoltoväli ja sopimuskausi — laskuri näyttää sopimuksen
+      kokonaishinnan ja vuosierän. Harjoituskäyttöön; hinnasto on kuvitteellinen.</p>
+  </header>
+
+  <div class="grid">
+    <section class="card">
+      <h2>Syötteet</h2>
+
+      <div class="field">
+        <label for="malli">Konemalli</label>
+        <select id="malli"></select>
+        <p class="hint" id="malli-hint"></p>
+      </div>
+
+      <div class="field">
+        <label for="vali">Huoltoväli</label>
+        <select id="vali"></select>
+        <p class="hint" id="vali-hint"></p>
+      </div>
+
+      <div class="field" style="margin-bottom:0">
+        <label for="kausi">Sopimuskausi</label>
+        <select id="kausi"></select>
+        <p class="hint" id="kausi-hint"></p>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Tarjous</h2>
+
+      <div class="total">
+        <div class="lbl">Vuosierä (alv 0 %)</div>
+        <div class="big" id="vuosiera">–</div>
+        <div class="sub" id="vuosiera-alv">–</div>
+      </div>
+
+      <table>
+        <tbody>
+          <tr><td>Mallin perushinta / vuosi</td><td id="r-perus">–</td></tr>
+          <tr><td id="l-vali">Huoltovälin kerroin</td><td id="r-vali">–</td></tr>
+          <tr><td id="l-kausi">Kausialennus</td><td id="r-kausi">–</td></tr>
+          <tr class="sum"><td id="l-yht">Sopimuksen kokonaishinta</td><td id="r-yht">–</td></tr>
+          <tr><td>Sisältää alv 25,5 %</td><td id="r-yht-alv">–</td></tr>
+        </tbody>
+      </table>
+
+      <p class="hint" id="huollot">–</p>
+      <button class="print" type="button" onclick="window.print()">Tulosta tarjous</button>
+    </section>
+  </div>
+
+  <p class="disclaimer">
+    Kuvitteellinen harjoitusaineisto. Peltokone Oy, sen mallit ja hinnat ovat keksittyjä
+    eivätkä vastaa minkään todellisen yrityksen hinnoittelua. Laskelma ei ole sitova tarjous.
+  </p>
+</div>
+
+<script>
+/* --- Kuvitteellinen hinnasto (alv 0 %) ------------------------------------ */
+const MALLIT = [
+  { id: "pk120", nimi: "PK-120 Pientraktori",      perus: 890,  kuvaus: "alle 80 hv, pienet tilat" },
+  { id: "pk240", nimi: "PK-240 Yleistraktori",     perus: 1450, kuvaus: "80–140 hv, yleiskone" },
+  { id: "pk360", nimi: "PK-360 Suurtraktori",      perus: 2100, kuvaus: "yli 140 hv, urakointi" },
+  { id: "pk500", nimi: "PK-500 Puimuri",           perus: 3400, kuvaus: "leikkuupuimuri, sesonkikäyttö" },
+  { id: "pk90",  nimi: "PK-90 Kylvölannoitin",     perus: 620,  kuvaus: "hinattava työkone" }
+];
+
+const VALIT = [
+  { id: "250",  nimi: "250 h (2 huoltoa / vuosi)",       kerroin: 1.45, huoltojaVuodessa: 2,   kuvaus: "raskas urakointikäyttö" },
+  { id: "500",  nimi: "500 h (1 huolto / vuosi)",        kerroin: 1.00, huoltojaVuodessa: 1,   kuvaus: "vakio, normaali tilakäyttö" },
+  { id: "1000", nimi: "1000 h (huolto joka 2. vuosi)",   kerroin: 0.70, huoltojaVuodessa: 0.5, kuvaus: "vähäinen käyttö" }
+];
+
+const KAUDET = [
+  { id: "1", nimi: "1 vuosi",  vuodet: 1, alennus: 0.00 },
+  { id: "3", nimi: "3 vuotta", vuodet: 3, alennus: 0.07 },
+  { id: "5", nimi: "5 vuotta", vuodet: 5, alennus: 0.12 }
+];
+
+const ALV = 0.255;
+
+/* Vuosierä = perushinta × huoltovälin kerroin × (1 − kausialennus), pyöristettynä
+   täysiin euroihin. Kokonaishinta = vuosierä × sopimusvuodet. */
+function laske(malliId, valiId, kausiId) {
+  const malli = MALLIT.find(m => m.id === malliId);
+  const vali  = VALIT.find(v => v.id === valiId);
+  const kausi = KAUDET.find(k => k.id === kausiId);
+  if (!malli || !vali || !kausi) throw new Error("Tuntematon valinta");
+
+  const listahintaVuodessa = malli.perus * vali.kerroin;
+  const vuosiera = Math.round(listahintaVuodessa * (1 - kausi.alennus));
+  const kokonaishinta = vuosiera * kausi.vuodet;
+
+  return {
+    malli, vali, kausi,
+    kausialennus: kausi.alennus,
+    listahintaVuodessa: Math.round(listahintaVuodessa),
+    vuosiera,
+    kokonaishinta,
+    vuosieraAlv: Math.round(vuosiera * (1 + ALV)),
+    kokonaishintaAlv: Math.round(kokonaishinta * (1 + ALV)),
+    huoltojaYhteensa: vali.huoltojaVuodessa * kausi.vuodet
+  };
+}
+
+/* --- Käyttöliittymä -------------------------------------------------------- */
+if (typeof document !== "undefined") {
+  const eur = n => new Intl.NumberFormat("fi-FI",
+    { style: "currency", currency: "EUR", maximumFractionDigits: 0 }).format(n);
+  const pros = n => new Intl.NumberFormat("fi-FI",
+    { style: "percent", maximumFractionDigits: 1 }).format(n);
+  const num = n => new Intl.NumberFormat("fi-FI", { maximumFractionDigits: 1 }).format(n);
+  const $ = id => document.getElementById(id);
+
+  function taytaValikko(el, rivit) {
+    el.innerHTML = rivit.map(r => `<option value="${r.id}">${r.nimi}</option>`).join("");
+  }
+
+  taytaValikko($("malli"), MALLIT);
+  taytaValikko($("vali"), VALIT);
+  taytaValikko($("kausi"), KAUDET);
+  $("vali").value = "500";
+  $("kausi").value = "3";
+
+  function paivita() {
+    const t = laske($("malli").value, $("vali").value, $("kausi").value);
+
+    $("malli-hint").textContent = t.malli.kuvaus;
+    $("vali-hint").textContent  = t.vali.kuvaus;
+    $("kausi-hint").textContent = t.kausi.alennus > 0
+      ? `Kausialennus ${pros(t.kausi.alennus)}.`
+      : "Ei kausialennusta.";
+
+    $("vuosiera").textContent     = eur(t.vuosiera);
+    $("vuosiera-alv").textContent = `${eur(t.vuosieraAlv)} sis. alv 25,5 %`;
+
+    $("r-perus").textContent = eur(t.malli.perus);
+    $("l-vali").textContent  = `Huoltoväli ${t.vali.id} h (kerroin ×${num(t.vali.kerroin)})`;
+    $("r-vali").textContent  = `${eur(t.listahintaVuodessa)} / v`;
+    $("l-kausi").textContent = `Kausialennus (${t.kausi.nimi})`;
+    $("r-kausi").textContent = t.kausialennus > 0 ? `− ${pros(t.kausialennus)}` : "–";
+    $("l-yht").textContent   = `Kokonaishinta, ${t.kausi.nimi} (alv 0 %)`;
+    $("r-yht").textContent   = eur(t.kokonaishinta);
+    $("r-yht-alv").textContent = eur(t.kokonaishintaAlv);
+
+    $("huollot").textContent =
+      `Sopimus kattaa ${num(t.huoltojaYhteensa)} määräaikaishuoltoa, ` +
+      `vuosierä ${eur(t.vuosiera)} × ${t.kausi.vuodet} v.`;
+  }
+
+  ["malli", "vali", "kausi"].forEach(id =>
+    $(id).addEventListener("input", paivita));
+  paivita();
+}
+
+if (typeof module !== "undefined") {
+  module.exports = { MALLIT, VALIT, KAUDET, ALV, laske };
+}
+</script>
+</body>
+</html>
