@@ -1,0 +1,13 @@
+{
+  "name": "peltokone-ilmoittautuminen",
+  "version": "1.0.0",
+  "description": "Asiakaspäivän ilmoittautumissivu (kuvitteellinen harjoitusyritys Peltokone Oy) – Cloudflare Worker + Supabase",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/paikallinen.mjs",
+    "test": "node tests/ilmoittautuminen.test.mjs",
+    "esikatselu": "node scripts/esikatselu.mjs",
+    "julkaise": "node scripts/julkaise.mjs"
+  }
+}
