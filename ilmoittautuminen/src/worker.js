@@ -82,7 +82,7 @@ async function osallistujat(env) {
 }
 
 async function kaikki(env) {
-  const r = await db(env, `${TAULU}?select=id,luotu,nimi,tila,kunta,sahkoposti,puhelin,henkia,lahde&order=luotu.asc`);
+  const r = await db(env, `${TAULU}?select=id,luotu,nimi,tila,kunta,sahkoposti,puhelin,henkia,ruokavalio,lahde&order=luotu.asc`);
   if (!r.ok) return dbVirhe(r);
   return json({ ilmoittautumiset: await r.json() }, 200, { 'Cache-Control': 'no-store' });
 }
@@ -126,6 +126,7 @@ export function tarkista(d, jarjestajaKirjaa) {
     sahkoposti: s(d.sahkoposti).toLowerCase() || null,
     puhelin: jarjestajaKirjaa ? (s(d.puhelin) || null) : null,
     henkia: Number(d.henkia),
+    ruokavalio: s(d.ruokavalio) || null,
   };
   const virhe = (viesti, kentta) => ({ virhe: viesti, kentta });
   if (rivi.nimi.length < 2) return virhe('Kirjoita nimi.', 'nimi');
@@ -139,6 +140,7 @@ export function tarkista(d, jarjestajaKirjaa) {
     return virhe('Tarkista sähköpostiosoite.', 'sahkoposti');
   }
   if (rivi.puhelin && !/^[+0-9 ()-]{5,30}$/.test(rivi.puhelin)) return virhe('Tarkista puhelinnumero.', 'puhelin');
+  if (rivi.ruokavalio && rivi.ruokavalio.length > 200) return virhe('Ruokavaliotieto on liian pitkä (enintään 200 merkkiä).', 'ruokavalio');
   if (!Number.isInteger(rivi.henkia) || rivi.henkia < 1 || rivi.henkia > 10) {
     return virhe('Henkimäärän pitää olla 1–10. Isommasta porukasta soita myyjällesi.', 'henkia');
   }

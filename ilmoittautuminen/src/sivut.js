@@ -187,6 +187,11 @@ details.kortti[open] > summary { margin-bottom: 14px; }
   margin-left: auto; min-height: 40px; padding: 6px 14px; font: inherit; font-size: 15px; font-weight: 700;
   background: transparent; color: var(--danger); border: 2px solid currentColor; border-radius: 10px; cursor: pointer;
 }
+.vihje { font-size: 15px; color: var(--muted); margin: 6px 0 0; }
+.rivi .ruokavalio {
+  grid-column: 1 / -1; margin-top: 6px; padding: 6px 10px; border-radius: 8px;
+  background: var(--accent-soft); border-left: 4px solid var(--accent); font-size: 16px; overflow-wrap: anywhere;
+}
 .poista.varmista { background: var(--danger); color: #fff; border-color: var(--danger); }
 .tyhja { color: var(--muted); margin: 0; }
 .osoitteet { width: 100%; margin-top: 12px; padding: 12px; font: inherit; font-size: 16px; color: var(--ink); background: var(--card); border: 2px solid var(--line); border-radius: 10px; }
@@ -305,6 +310,11 @@ export const etusivu = {
         <input id="sahkoposti" name="sahkoposti" type="email" inputmode="email" autocomplete="email" maxlength="120" required>
       </div>
       ${laskuriHtml('henkia-laskuri')}
+      <div class="kentta">
+        <label for="ruokavalio">Erityisruokavalio <span class="apu">– vapaaehtoinen</span></label>
+        <input id="ruokavalio" name="ruokavalio" type="text" maxlength="200" autocomplete="off" placeholder="esim. 1 gluteeniton, 1 laktoositon">
+        <p class="vihje">Kerro koko porukan puolesta.</p>
+      </div>
       <div class="piilo" aria-hidden="true">
         <label for="kotisivu">Jätä tämä tyhjäksi</label>
         <input id="kotisivu" name="kotisivu" type="text" tabindex="-1" autocomplete="off">
@@ -449,12 +459,18 @@ export const jarjestaja = {
       <div class="kentta"><label for="l-puhelin">Puhelin <span class="apu">– vapaaehtoinen</span></label><input id="l-puhelin" name="puhelin" type="tel" inputmode="tel" maxlength="30" autocomplete="off"></div>
       <div class="kentta"><label for="l-sahkoposti">Sähköposti <span class="apu">– vapaaehtoinen</span></label><input id="l-sahkoposti" name="sahkoposti" type="email" inputmode="email" maxlength="120" autocomplete="off"></div>
       ${laskuriHtml('l-henkia')}
+      <div class="kentta">
+        <label for="l-ruokavalio">Erityisruokavalio <span class="apu">– vapaaehtoinen</span></label>
+        <input id="l-ruokavalio" name="ruokavalio" type="text" maxlength="200" autocomplete="off" placeholder="esim. 1 gluteeniton, 1 laktoositon">
+        <p class="vihje">Kerro koko porukan puolesta.</p>
+      </div>
       <button class="nappi" type="submit">Tallenna ilmoittautuminen</button>
     </form>
   </details>
 
   <section class="kortti">
     <h2>Ilmoittautuneet</h2>
+    <p class="maara" id="ruokavaliot"></p>
     <ul class="rivit" id="rivit"></ul>
   </section>
 
@@ -476,6 +492,9 @@ function piirra() {
   document.getElementById('luku-henkia').textContent = henkia;
   document.getElementById('luku-ilm').textContent = rivit.length;
   document.getElementById('luku-puh').textContent = rivit.filter(r => r.lahde === 'puhelin').length;
+  const erikois = rivit.filter(r => r.ruokavalio).length;
+  document.getElementById('ruokavaliot').textContent = erikois === 0 ? 'Ei erityisruokavalioita.'
+    : 'Erityisruokavalio ' + erikois + ' ilmoittautumisessa – näkyy rivin alla.';
   const lista = document.getElementById('rivit');
   if (!rivit.length) { lista.replaceChildren(el('li', {}, el('p', { class: 'tyhja' }, 'Ei vielä ilmoittautuneita.'))); return; }
   lista.replaceChildren(...rivit.map(r => el('li', { class: 'rivi' },
@@ -483,6 +502,7 @@ function piirra() {
     el('span', { class: 'hlo' }, r.henkia, el('small', {}, 'hlö')),
     el('span', { class: 'tiedot' }, r.tila + ', ' + r.kunta),
     (r.sahkoposti || r.puhelin) ? el('span', { class: 'yhteys' }, [r.puhelin, r.sahkoposti].filter(Boolean).join(' · ')) : null,
+    r.ruokavalio ? el('span', { class: 'ruokavalio' }, el('strong', {}, 'Ruokavalio: '), r.ruokavalio) : null,
     el('span', { class: 'alarivi' },
       r.lahde === 'puhelin' ? el('span', { class: 'merkinta' }, 'puhelin') : el('span', {}, 'verkossa'),
       el('span', {}, aikaMuoto.format(new Date(r.luotu))),

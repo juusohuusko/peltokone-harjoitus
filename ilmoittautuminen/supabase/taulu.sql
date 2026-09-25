@@ -11,6 +11,10 @@ create table if not exists public.ilmoittautumiset (
   lahde       text not null default 'verkko' check (lahde in ('verkko', 'puhelin'))
 );
 
+-- Erityisruokavalio (vapaaehtoinen), lisätty jälkikäteen
+alter table public.ilmoittautumiset add column if not exists ruokavalio text
+  check (ruokavalio is null or char_length(ruokavalio) <= 200);
+
 -- Sama sähköposti vain kerran (kirjainkoolla ei väliä)
 create unique index if not exists ilmoittautumiset_sahkoposti_uniikki
   on public.ilmoittautumiset (lower(sahkoposti)) where sahkoposti is not null;

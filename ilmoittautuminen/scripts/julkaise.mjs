@@ -45,8 +45,8 @@ await sql(lue('supabase/taulu.sql'));
 const [{ n }] = await sql('select count(*)::int as n from public.ilmoittautumiset');
 if (n === 0) {
   const q = (v) => (v == null ? 'null' : `'${String(v).replace(/'/g, "''")}'`);
-  const rivit = HARJOITUSDATA.map((r) => `(${[r.luotu, r.nimi, r.tila, r.kunta, r.sahkoposti, r.puhelin].map(q).join(', ')}, ${Number(r.henkia)}, ${q(r.lahde)})`);
-  await sql(`insert into public.ilmoittautumiset (luotu, nimi, tila, kunta, sahkoposti, puhelin, henkia, lahde) values\n${rivit.join(',\n')}`);
+  const rivit = HARJOITUSDATA.map((r) => `(${[r.luotu, r.nimi, r.tila, r.kunta, r.sahkoposti, r.puhelin, r.ruokavalio].map(q).join(', ')}, ${Number(r.henkia)}, ${q(r.lahde)})`);
+  await sql(`insert into public.ilmoittautumiset (luotu, nimi, tila, kunta, sahkoposti, puhelin, ruokavalio, henkia, lahde) values\n${rivit.join(',\n')}`);
   console.log(`Supabase: lisätty ${rivit.length} harjoitusriviä.`);
 } else {
   console.log(`Supabase: taulussa on jo ${n} riviä – harjoitusdataa ei lisätä.`);

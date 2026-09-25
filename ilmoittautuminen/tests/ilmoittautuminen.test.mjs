@@ -25,6 +25,9 @@ await testi('kelvollinen syöte siistitään', () => {
   assert.equal(rivi.sahkoposti, 'matti@example.com');
   assert.equal(rivi.henkia, 2);
   assert.equal(rivi.puhelin, null);
+  assert.equal(rivi.ruokavalio, null);
+  assert.equal(tarkista({ ...hyva, ruokavalio: ' gluteeniton ' }, false).rivi.ruokavalio, 'gluteeniton');
+  assert.equal(tarkista({ ...hyva, ruokavalio: 'x'.repeat(201) }, false).kentta, 'ruokavalio');
 });
 await testi('pakolliset kentät ja rajat', () => {
   assert.equal(tarkista({ ...hyva, nimi: '' }, false).kentta, 'nimi');
@@ -67,7 +70,7 @@ await testi('sivu aukeaa, tapahtuman tiedot ja julkinen lista näkyvät', async 
   assert.equal(await s.textContent('#maara'), '8 tilaa ilmoittautunut');
   const lista = await s.textContent('#tulijat');
   assert.match(lista, /Peltolan tila/);
-  assert.doesNotMatch(lista, /Matti|example\.com/, 'julkisessa listassa ei saa näkyä nimiä eikä sähköposteja');
+  assert.doesNotMatch(lista, /Matti|example\.com|vegaani/, 'julkisessa listassa ei saa näkyä nimiä, sähköposteja eikä ruokavalioita');
   await eiVaakavieritysta(s);
   await kuva(s, '1-etusivu');
 });
@@ -91,6 +94,7 @@ await testi('ilmoittautuminen tallentuu ja kiitos näkyy', async () => {
   await s.click('#henkia-laskuri button[aria-label*="lisää"]');
   await s.click('#henkia-laskuri button[aria-label*="lisää"]');
   assert.equal(await s.textContent('#henkia-laskuri output'), '3 henkeä');
+  await s.fill('#ruokavalio', '1 kasvis');
   await s.click('button[type=submit]');
   await s.waitForSelector('#kiitos:not([hidden])');
   assert.equal(await s.textContent('#kiitos-otsikko'), 'Kiitos, Kalle!');
@@ -99,6 +103,7 @@ await testi('ilmoittautuminen tallentuu ja kiitos näkyy', async () => {
   const tallennettu = supa.rivit.find((r) => r.sahkoposti === 'kalle@example.com');
   assert.equal(tallennettu.henkia, 3);
   assert.equal(tallennettu.lahde, 'verkko');
+  assert.equal(tallennettu.ruokavalio, '1 kasvis');
   await kuva(s, '2-kiitos');
 });
 
@@ -162,6 +167,9 @@ await testi('kirjautuminen ja luvut yhdellä silmäyksellä', async () => {
   assert.equal(await j.textContent('#luku-puh'), '2');
   assert.equal(await j.locator('#rivit .rivi').count(), 9);
   assert.match(await j.textContent('#rivit'), /matti\.peltonen@example\.com/);
+  assert.equal(await j.textContent('.rivi:has-text("Aino Rantanen") .ruokavalio'), 'Ruokavalio: vegaani');
+  assert.equal(await j.textContent('.rivi:has-text("Kalle Koekäyttäjä") .ruokavalio'), 'Ruokavalio: 1 kasvis');
+  assert.equal(await j.textContent('#ruokavaliot'), 'Erityisruokavalio 3 ilmoittautumisessa – näkyy rivin alla.');
   const paaluku = await j.locator('.luku.paa').boundingBox();
   assert.ok(paaluku.y + paaluku.height < 300, 'henkimäärä näkyy heti ylhäällä');
   await eiVaakavieritysta(j);
@@ -173,6 +181,7 @@ await testi('puhelinilmoittautumisen kirjaus päivittää luvut', async () => {
   await j.fill('#l-tila', 'Vasaran tila');
   await j.fill('#l-kunta', 'Kangasala');
   await j.fill('#l-puhelin', '040 000 0003');
+  await j.fill('#l-ruokavalio', 'laktoositon');
   await j.click('#l-henkia button[aria-label*="lisää"]');
   await kuva(j, '4-lisaa-puhelin');
   await j.click('#lisaa button[type=submit]');
@@ -180,6 +189,7 @@ await testi('puhelinilmoittautumisen kirjaus päivittää luvut', async () => {
   assert.equal(await j.textContent('#luku-puh'), '3');
   assert.match(await j.textContent('#rivit'), /Veikko Vasara/);
   assert.equal(supa.rivit.find((r) => r.nimi === 'Veikko Vasara').lahde, 'puhelin');
+  assert.equal(supa.rivit.find((r) => r.nimi === 'Veikko Vasara').ruokavalio, 'laktoositon');
 });
 await testi('poisto vahvistetaan ja päivittää luvut', async () => {
   const poistonappi = j.locator('.rivi', { hasText: 'Veikko Vasara' }).locator('.poista');
