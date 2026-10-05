@@ -69,3 +69,5 @@ Tuloste päättyy riviin `Kaikki testit läpi.`, ja epäonnistuessaan paluuarvo 
 | `index.html` | Koko työkalu: hinnasto, laskenta ja käyttöliittymä |
 | `tests/laskuri.test.mjs` | Selaintestit |
 | `package.json` | `npm test` -skripti ja testien riippuvuus |
+| `huoltopyynto/` | Huoltopyyntöpalvelu v1, ks. [`huoltopyynto/README.md`](huoltopyynto/README.md) |
+| `tests/huoltopyynto.test.mjs` | Huoltopyyntöpalvelun selaintestit ja kuvakaappaukset |

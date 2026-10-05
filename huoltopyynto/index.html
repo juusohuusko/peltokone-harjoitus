@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Huoltopyyntö – Peltokone Oy</title>
+<style>
+  :root {
+    --bg: #f7f2e3;          /* kermanvalkoinen */
+    --card: #fffdf6;
+    --ink: #1f2a1c;
+    --muted: #5e6a57;
+    --line: #ddd5bd;
+    --brand: #2e4a24;       /* tumma peltovihreä */
+    --brand-hover: #243b1c;
+    --brand-soft: #e6ecd9;
+    --on-brand: #fffdf6;
+    --error: #a32a1c;
+    --new: #b5651d;
+    --new-soft: #f8e6d2;
+    --ok: #2e4a24;
+    --ok-soft: #e1ead3;
+    --done: #5e6a57;
+    --done-soft: #ebe7da;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 18px/1.5 "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  }
+  .topbar {
+    background: var(--brand); color: var(--on-brand);
+    padding: 14px 16px;
+  }
+  .topbar .in {
+    max-width: 720px; margin: 0 auto;
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  }
+  .logo { font-weight: 800; font-size: 20px; letter-spacing: .01em; }
+  .logo small { display: block; font-weight: 500; font-size: 13px; opacity: .8; }
+  .topbar a { color: var(--on-brand); font-size: 15px; }
+  main { max-width: 720px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 28px; line-height: 1.2; margin: 0 0 6px; color: var(--brand); }
+  .lead { color: var(--muted); margin: 0 0 24px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 20px;
+  }
+
+  /* Lomake */
+  fieldset { border: 0; padding: 0; margin: 0 0 24px; min-width: 0; }
+  legend, label.lbl { display: block; font-weight: 700; margin: 0 0 8px; padding: 0; }
+  .opt { font-weight: 400; color: var(--muted); font-size: 15px; }
+  input[type="text"], input[type="tel"], input[type="number"], select {
+    width: 100%; min-height: 56px; padding: 12px 14px;
+    font: inherit; color: var(--ink); background: #fff;
+    border: 2px solid var(--line); border-radius: 10px;
+  }
+  input:focus-visible, select:focus-visible, button:focus-visible, .choice input:focus-visible + span {
+    outline: 3px solid var(--brand); outline-offset: 2px;
+  }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 520px) { .row2 { grid-template-columns: 1fr; } }
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 520px) { .choices.wide { grid-template-columns: 1fr; } }
+  @media (max-width: 340px) { .choices { grid-template-columns: 1fr; } }
+  .choice { position: relative; display: block; cursor: pointer; }
+  .choice input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+  .choice span {
+    display: flex; flex-direction: column; justify-content: center;
+    min-height: 64px; padding: 12px 16px;
+    background: #fff; border: 2px solid var(--line); border-radius: 10px;
+    font-weight: 700;
+  }
+  .choice span small { font-weight: 400; color: var(--muted); font-size: 14px; }
+  .choice input:checked + span {
+    border-color: var(--brand); background: var(--brand-soft);
+    box-shadow: inset 0 0 0 1px var(--brand);
+  }
+  .err { color: var(--error); font-size: 15px; font-weight: 600; margin: 6px 0 0; }
+  .err:empty { display: none; }
+  .invalid input[type="text"], .invalid input[type="tel"],
+  .invalid input[type="number"], .invalid select,
+  .invalid .choice span { border-color: var(--error); }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-height: 60px; padding: 14px 24px;
+    font: inherit; font-weight: 700; font-size: 19px; text-decoration: none;
+    color: var(--on-brand); background: var(--brand);
+    border: 2px solid var(--brand); border-radius: 12px; cursor: pointer;
+  }
+  .btn:hover { background: var(--brand-hover); }
+  .btn.block { width: 100%; }
+  .btn.ghost { background: transparent; color: var(--brand); }
+  .btn.ghost:hover { background: var(--brand-soft); }
+  .btn.small { min-height: 52px; font-size: 17px; padding: 10px 18px; }
+
+  /* Kuittaus */
+  .receipt-head { text-align: center; margin-bottom: 20px; }
+  .check {
+    width: 72px; height: 72px; margin: 0 auto 12px; border-radius: 50%;
+    background: var(--brand); color: var(--on-brand);
+    display: flex; align-items: center; justify-content: center; font-size: 40px;
+  }
+  .refno {
+    display: inline-block; margin-top: 8px; padding: 6px 16px;
+    background: var(--brand-soft); border-radius: 999px;
+    font-weight: 800; font-size: 22px; color: var(--brand); letter-spacing: .03em;
+  }
+  dl.summary { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 10px 16px; }
+  dl.summary dt { color: var(--muted); }
+  dl.summary dd { margin: 0; font-weight: 600; }
+  @media (max-width: 420px) {
+    dl.summary { grid-template-columns: 1fr; gap: 0; }
+    dl.summary dd { margin-bottom: 10px; }
+  }
+  .note { background: var(--brand-soft); border-radius: 10px; padding: 14px 16px; margin: 20px 0; }
+  .actions { display: grid; gap: 12px; margin-top: 20px; }
+
+  /* Työnjohto */
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 20px; }
+  .tab {
+    min-height: 52px; padding: 10px 18px; font: inherit; font-weight: 700; font-size: 17px;
+    background: var(--card); color: var(--brand);
+    border: 2px solid var(--line); border-radius: 999px; cursor: pointer;
+  }
+  .tab[aria-pressed="true"] { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+  .tab .n { font-weight: 500; opacity: .8; margin-left: 4px; }
+  .list { display: grid; gap: 14px; list-style: none; margin: 0; padding: 0; }
+  .item { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 18px; }
+  .item-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px; }
+  .item h3 { margin: 0; font-size: 20px; line-height: 1.3; }
+  .item .ref { color: var(--muted); font-size: 14px; font-weight: 600; }
+  .badge { flex: none; padding: 4px 12px; border-radius: 999px; font-size: 14px; font-weight: 800; text-transform: uppercase; letter-spacing: .04em; }
+  .badge.uusi { background: var(--new-soft); color: var(--new); }
+  .badge.vahvistettu { background: var(--ok-soft); color: var(--ok); }
+  .badge.valmis { background: var(--done-soft); color: var(--done); }
+  .facts { display: flex; flex-wrap: wrap; gap: 6px 20px; margin: 0 0 14px; padding: 0; list-style: none; font-size: 16px; }
+  .facts b { font-weight: 700; }
+  .facts a { color: var(--brand); font-weight: 700; }
+  .item-actions { display: flex; flex-wrap: wrap; gap: 10px; }
+  .empty { text-align: center; color: var(--muted); padding: 32px 16px; }
+  footer { max-width: 720px; margin: 0 auto; padding: 0 16px 32px; color: var(--muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="in">
+    <div class="logo">Peltokone Oy<small>Konehuolto</small></div>
+    <a id="navlinkki" href="#/tyonjohto">Työnjohto</a>
+  </div>
+</div>
+
+<main id="sovellus" aria-live="polite"></main>
+
+<footer>Peltokone Oy on kuvitteellinen harjoitusyritys.</footer>
+
+<script>
+/* ---- Valintalistat: uusi vaihtoehto on yksi rivi ---- */
+const KONEET = [
+  ["traktori", "Traktori"],
+  ["puimuri", "Puimuri"],
+  ["kylvokone", "Kylvökone"],
+  ["paalain", "Paalain"],
+  ["niittokone", "Niittokone"],
+  ["muu", "Muu kone"]
+];
+const HUOLLOT = [
+  ["maaraaikais", "Määräaikaishuolto", "tuntien mukainen huolto"],
+  ["korjaus", "Vika tai korjaus", "kone ei toimi oikein"],
+  ["kausi", "Kausitarkastus", "ennen sesonkia"],
+  ["muu", "Muu huolto", "kerromme puhelimessa"]
+];
+const TOIMITUS = [
+  ["tuonti", "Tuon koneen itse", "korjaamolle"],
+  ["nouto", "Noutakaa kone", "haemme tilalta"]
+];
+const TILAT = [
+  ["uusi", "Uusi"],
+  ["vahvistettu", "Vahvistettu"],
+  ["valmis", "Valmis"]
+];
+const VIIKKOJA_TARJOLLA = 12;
+const AVAIN = "peltokone.huoltopyynnot.v1";
+
+const nimi = (lista, id) => (lista.find(r => r[0] === id) || [, id])[1];
+
+/* ---- Tallennus (localStorage) ---- */
+function lataa() {
+  try {
+    const data = JSON.parse(localStorage.getItem(AVAIN) || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch (e) {
+    return [];
+  }
+}
+function tallenna(pyynnot) {
+  localStorage.setItem(AVAIN, JSON.stringify(pyynnot));
+}
+function seuraavaNumero(pyynnot) {
+  const max = pyynnot.reduce((m, p) => Math.max(m, Number(p.id.slice(3)) || 0), 0);
+  return "HP-" + String(max + 1).padStart(4, "0");
+}
+
+/* ---- ISO-viikot ---- */
+function isoViikko(pvm) {
+  const d = new Date(Date.UTC(pvm.getFullYear(), pvm.getMonth(), pvm.getDate()));
+  const pv = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - pv);
+  const vuosi = d.getUTCFullYear();
+  const viikko = Math.ceil(((d - Date.UTC(vuosi, 0, 1)) / 864e5 + 1) / 7);
+  return { vuosi, viikko };
+}
+/** Seuraavat viikot ensi viikon maanantaista alkaen. */
+function tarjolleViikot(tanaan = new Date()) {
+  const ma = new Date(tanaan.getFullYear(), tanaan.getMonth(), tanaan.getDate());
+  ma.setDate(ma.getDate() - ((ma.getDay() || 7) - 1) + 7);
+  const viikot = [];
+  for (let i = 0; i < VIIKKOJA_TARJOLLA; i++) {
+    const alku = new Date(ma); alku.setDate(ma.getDate() + 7 * i);
+    const loppu = new Date(alku); loppu.setDate(alku.getDate() + 6);
+    const { vuosi, viikko } = isoViikko(alku);
+    viikot.push({
+      id: `${vuosi}-W${String(viikko).padStart(2, "0")}`,
+      teksti: `Viikko ${viikko} (${alku.getDate()}.${alku.getMonth() + 1}.–${loppu.getDate()}.${loppu.getMonth() + 1}.)`
+    });
+  }
+  return viikot;
+}
+function viikkoTeksti(id) {
+  const [v, w] = id.split("-W");
+  return `viikko ${Number(w)} / ${v}`;
+}
+
+/* ---- Puhelinnumero ---- */
+function siistiNumero(raaka) {
+  const n = raaka.replace(/[\s\-()]/g, "");
+  if (/^0\d{6,11}$/.test(n)) return n;
+  if (/^\+358\d{6,11}$/.test(n)) return "0" + n.slice(4);
+  return null;
+}
+
+/* ---- Apu: elementin rakentaja, teksti aina textContentina ---- */
+function el(tag, attrs = {}, ...lapset) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs)) {
+    if (v === false || v == null) continue;
+    if (k === "class") e.className = v;
+    else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else e.setAttribute(k, v === true ? "" : v);
+  }
+  for (const l of lapset.flat(Infinity)) if (l != null) e.append(l);
+  return e;
+}
+const sovellus = document.getElementById("sovellus");
+
+/* ================= Näkymä 1: lomake ================= */
+function valintaRyhma(nimiAttr, rivit, luokka = "") {
+  return el("div", { class: "choices " + luokka },
+    rivit.map(([id, otsikko, selite]) =>
+      el("label", { class: "choice" },
+        el("input", { type: "radio", name: nimiAttr, value: id }),
+        el("span", {}, otsikko, selite ? el("small", {}, selite) : null))));
+}
+
+function naytaLomake() {
+  document.title = "Huoltopyyntö – Peltokone Oy";
+  const viikot = tarjolleViikot();
+  const lomake = el("form", { id: "lomake", class: "card", novalidate: true },
+    el("fieldset", { id: "f-kone" },
+      el("legend", {}, "Mikä kone huolletaan?"),
+      valintaRyhma("kone", KONEET),
+      el("p", { class: "err", id: "e-kone" })),
+    el("div", { class: "row2" },
+      el("fieldset", { id: "f-malli" },
+        el("label", { class: "lbl", for: "malli" }, "Merkki ja malli"),
+        el("input", { type: "text", id: "malli", name: "malli", autocomplete: "off",
+                      placeholder: "esim. Valtra N175" }),
+        el("p", { class: "err", id: "e-malli" })),
+      el("fieldset", { id: "f-tunnit" },
+        el("label", { class: "lbl", for: "tunnit" }, "Käyttötunnit"),
+        el("input", { type: "number", id: "tunnit", name: "tunnit", inputmode: "numeric",
+                      min: "0", step: "1", placeholder: "esim. 2450" }),
+        el("p", { class: "err", id: "e-tunnit" }))),
+    el("fieldset", { id: "f-huolto" },
+      el("legend", {}, "Huollon tyyppi"),
+      valintaRyhma("huolto", HUOLLOT, "wide"),
+      el("p", { class: "err", id: "e-huolto" })),
+    el("fieldset", { id: "f-viikko" },
+      el("label", { class: "lbl", for: "viikko" }, "Toivottu viikko"),
+      el("select", { id: "viikko", name: "viikko" },
+        el("option", { value: "" }, "Valitse viikko"),
+        viikot.map(v => el("option", { value: v.id }, v.teksti))),
+      el("p", { class: "err", id: "e-viikko" })),
+    el("fieldset", { id: "f-toimitus" },
+      el("legend", {}, "Tuonti vai nouto?"),
+      valintaRyhma("toimitus", TOIMITUS, "wide"),
+      el("p", { class: "err", id: "e-toimitus" })),
+    el("fieldset", { id: "f-puhelin" },
+      el("label", { class: "lbl", for: "puhelin" }, "Puhelinnumero"),
+      el("input", { type: "tel", id: "puhelin", name: "puhelin", autocomplete: "tel",
+                    inputmode: "tel", placeholder: "esim. 040 123 4567" }),
+      el("p", { class: "err", id: "e-puhelin" })),
+    el("button", { type: "submit", class: "btn block", id: "laheta" }, "Lähetä huoltopyyntö"));
+
+  lomake.addEventListener("submit", e => {
+    e.preventDefault();
+    const pyynto = tarkista(lomake);
+    if (!pyynto) return;
+    const pyynnot = lataa();
+    pyynto.id = seuraavaNumero(pyynnot);
+    pyynto.tila = "uusi";
+    pyynto.luotu = new Date().toISOString();
+    pyynnot.push(pyynto);
+    tallenna(pyynnot);
+    location.hash = "#/kuittaus/" + pyynto.id;
+  });
+
+  sovellus.replaceChildren(
+    el("h1", {}, "Jätä huoltopyyntö"),
+    el("p", { class: "lead" }, "Täytä tiedot, niin soitamme ja vahvistamme huoltoajan."),
+    lomake);
+}
+
+function tarkista(lomake) {
+  const fd = new FormData(lomake);
+  const arvo = k => String(fd.get(k) || "").trim();
+  const virheet = {};
+  const p = {
+    kone: arvo("kone"),
+    malli: arvo("malli"),
+    tunnit: arvo("tunnit"),
+    huolto: arvo("huolto"),
+    viikko: arvo("viikko"),
+    toimitus: arvo("toimitus"),
+    puhelin: arvo("puhelin")
+  };
+  if (!p.kone) virheet.kone = "Valitse kone.";
+  if (!p.malli) virheet.malli = "Kirjoita koneen merkki ja malli.";
+  if (!/^\d{1,6}$/.test(p.tunnit)) virheet.tunnit = "Anna käyttötunnit kokonaislukuna.";
+  if (!p.huolto) virheet.huolto = "Valitse huollon tyyppi.";
+  if (!p.viikko) virheet.viikko = "Valitse toivottu viikko.";
+  if (!p.toimitus) virheet.toimitus = "Valitse tuonti tai nouto.";
+  const numero = siistiNumero(p.puhelin);
+  if (!numero) virheet.puhelin = "Tarkista puhelinnumero, esim. 040 123 4567.";
+
+  for (const k of Object.keys(p)) {
+    lomake.querySelector("#e-" + k).textContent = virheet[k] || "";
+    lomake.querySelector("#f-" + k).classList.toggle("invalid", !!virheet[k]);
+  }
+  const eka = Object.keys(p).find(k => virheet[k]);
+  if (eka) {
+    const kentta = lomake.querySelector(`#f-${eka} input, #f-${eka} select`);
+    lomake.querySelector("#f-" + eka).scrollIntoView({ block: "center" });
+    kentta.focus({ preventScroll: true });
+    return null;
+  }
+  p.tunnit = Number(p.tunnit);
+  p.puhelin = numero;
+  return p;
+}
+
+/* ================= Näkymä 2: kuittaus ================= */
+function yhteenveto(p) {
+  const rivit = [
+    ["Kone", nimi(KONEET, p.kone)],
+    ["Merkki ja malli", p.malli],
+    ["Käyttötunnit", p.tunnit.toLocaleString("fi-FI") + " h"],
+    ["Huolto", nimi(HUOLLOT, p.huolto)],
+    ["Toivottu aika", viikkoTeksti(p.viikko)],
+    ["Kuljetus", nimi(TOIMITUS, p.toimitus)],
+    ["Puhelin", muotoileNumero(p.puhelin)]
+  ];
+  return el("dl", { class: "summary" }, rivit.map(([k, v]) => [el("dt", {}, k), el("dd", {}, v)]));
+}
+function muotoileNumero(n) {
+  return n.length >= 10 ? `${n.slice(0, 3)} ${n.slice(3, 6)} ${n.slice(6)}` : n;
+}
+
+function naytaKuittaus(id) {
+  const p = lataa().find(x => x.id === id);
+  if (!p) {
+    sovellus.replaceChildren(
+      el("h1", {}, "Pyyntöä ei löytynyt"),
+      el("p", { class: "lead" }, "Tarkista pyyntönumero tai jätä uusi pyyntö."),
+      el("a", { class: "btn", href: "#/" }, "Uusi huoltopyyntö"));
+    return;
+  }
+  document.title = `Kuittaus ${p.id} – Peltokone Oy`;
+  sovellus.replaceChildren(
+    el("div", { class: "card" },
+      el("div", { class: "receipt-head" },
+        el("div", { class: "check", "aria-hidden": "true" }, "✓"),
+        el("h1", {}, "Kiitos, pyyntö vastaanotettu!"),
+        el("div", { class: "refno", id: "pyyntonumero" }, p.id)),
+      yhteenveto(p),
+      el("p", { class: "note" },
+        `Soitamme numeroon ${muotoileNumero(p.puhelin)} ja vahvistamme huoltoajan. ` +
+        "Ota pyyntönumero talteen, jos asioit kanssamme puhelimessa."),
+      el("div", { class: "actions" },
+        el("a", { class: "btn block", href: "#/" }, "Jätä uusi pyyntö"))));
+}
+
+/* ================= Näkymä 3: työnjohto ================= */
+let suodatin = "kaikki";
+
+function naytaTyonjohto() {
+  document.title = "Huoltopyynnöt – työnjohto – Peltokone Oy";
+  const pyynnot = lataa().sort((a, b) => b.luotu.localeCompare(a.luotu) || b.id.localeCompare(a.id));
+  const maara = t => pyynnot.filter(p => p.tila === t).length;
+
+  const tabit = el("div", { class: "tabs", role: "group", "aria-label": "Suodata tilan mukaan" },
+    [["kaikki", "Kaikki", pyynnot.length], ...TILAT.map(([id, n]) => [id, n, maara(id)])]
+      .map(([id, n, lkm]) => el("button", {
+          type: "button", class: "tab", "data-suodatin": id,
+          "aria-pressed": String(suodatin === id),
+          onclick: () => { suodatin = id; naytaTyonjohto(); }
+        }, n, el("span", { class: "n" }, `(${lkm})`))));
+
+  const naytettavat = pyynnot.filter(p => suodatin === "kaikki" || p.tila === suodatin);
+  const lista = naytettavat.length
+    ? el("ul", { class: "list", id: "lista" }, naytettavat.map(korttiTyonjohdolle))
+    : el("div", { class: "card empty", id: "lista" },
+        pyynnot.length ? "Ei pyyntöjä tässä tilassa." : "Ei vielä huoltopyyntöjä.");
+
+  sovellus.replaceChildren(
+    el("h1", {}, "Huoltopyynnöt"),
+    el("p", { class: "lead" }, maara("uusi") === 1 ? "1 uusi pyyntö odottaa vahvistusta."
+      : `${maara("uusi")} uutta pyyntöä odottaa vahvistusta.`),
+    tabit, lista);
+}
+
+function korttiTyonjohdolle(p) {
+  const vaihda = uusiTila => () => {
+    const kaikki = lataa();
+    const kohde = kaikki.find(x => x.id === p.id);
+    if (!kohde) return;
+    kohde.tila = uusiTila;
+    tallenna(kaikki);
+    naytaTyonjohto();
+  };
+  const napit = {
+    uusi: [el("button", { type: "button", class: "btn small", onclick: vaihda("vahvistettu") }, "Vahvista")],
+    vahvistettu: [
+      el("button", { type: "button", class: "btn small", onclick: vaihda("valmis") }, "Merkitse valmiiksi"),
+      el("button", { type: "button", class: "btn small ghost", onclick: vaihda("uusi") }, "Palauta uudeksi")],
+    valmis: [el("button", { type: "button", class: "btn small ghost", onclick: vaihda("vahvistettu") }, "Palauta vahvistetuksi")]
+  }[p.tila] || [];
+  const luotu = new Date(p.luotu);
+
+  return el("li", { class: "item", "data-id": p.id, "data-tila": p.tila },
+    el("div", { class: "item-head" },
+      el("div", {},
+        el("div", { class: "ref" }, `${p.id} · jätetty ${luotu.toLocaleDateString("fi-FI")} klo ${luotu.toLocaleTimeString("fi-FI", { hour: "2-digit", minute: "2-digit" })}`),
+        el("h3", {}, `${nimi(KONEET, p.kone)} – ${p.malli}`)),
+      el("span", { class: "badge " + p.tila }, nimi(TILAT, p.tila))),
+    el("ul", { class: "facts" },
+      el("li", {}, el("b", {}, nimi(HUOLLOT, p.huolto))),
+      el("li", {}, p.tunnit.toLocaleString("fi-FI") + " h"),
+      el("li", {}, viikkoTeksti(p.viikko)),
+      el("li", {}, nimi(TOIMITUS, p.toimitus)),
+      el("li", {}, el("a", { href: "tel:" + p.puhelin }, muotoileNumero(p.puhelin)))),
+    el("div", { class: "item-actions" }, napit));
+}
+
+/* ---- Reititys ---- */
+function reititä() {
+  const h = location.hash.replace(/^#\/?/, "");
+  const nav = document.getElementById("navlinkki");
+  if (h.startsWith("tyonjohto")) {
+    nav.textContent = "Uusi pyyntö"; nav.href = "#/";
+    naytaTyonjohto();
+  } else {
+    nav.textContent = "Työnjohto"; nav.href = "#/tyonjohto";
+    if (h.startsWith("kuittaus/")) naytaKuittaus(decodeURIComponent(h.slice(9)));
+    else naytaLomake();
+  }
+  window.scrollTo(0, 0);
+}
+window.addEventListener("hashchange", reititä);
+reititä();
+</script>
+</body>
+</html>
